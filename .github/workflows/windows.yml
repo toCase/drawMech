@@ -26,7 +26,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v2
       with:
-        version: 6.7.0
+        version: ${{ env.QT_VERSION }}
         host: windows
         target: desktop
         arch: win64_msvc2019_64
@@ -34,22 +34,34 @@ jobs:
         modules: qtcharts qt3d
         setup-python: false
     
+    - name: Download JOM
+      uses: suisei-cn/actions-download-file@v1
+      with:
+        url:    http://download.qt.io/official_releases/jom/jom.zip
+        target: ${{ runner.temp }}\
+
+    - name: Unzip JOM
+      working-directory: ${{ runner.temp }}
+      run:  |
+          7z x jom.zip -ojom
+    
     - name: Set up Visual Studio shell
       uses: egor-tensin/vs-shell@v2
       with:
         arch: x64
     
+    - name: Create build directory
+      run:  mkdir ${{ runner.temp }}\build
 
     - name: Configure and build project
+      working-directory: ${{ runner.temp }}\build
       run: |
         cd drawMech
         qmake DrawProject.pro
-        nmake
-
-    - name: Deploy using windeployqt
-      run: |
-        cd drawMech
-        windeployqt --qmldir DrawProject.exe 
+        ${{ runner.temp }}\jom\jom -j2
+        
+        cd release
+        windeployqt --qmldir ${{ env.SOURCE_DIR }} DrawProject.exe 
         copy C:\Windows\System32\concrt140.dll .
         copy C:\Windows\System32\vccorlib140.dll .
         copy C:\Windows\System32\msvcp140.dll .
