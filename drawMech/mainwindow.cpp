@@ -10,7 +10,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->checkBox_setting, &QCheckBox::stateChanged, ui->frame, &QFrame::setVisible);
     ui->frame->hide();
 
-    ui->checkBox_setting->hide();
+    // ui->checkBox_setting->hide();
+    // ui->sl_scale->hide();
 
     angle = 5;
 
@@ -69,10 +70,14 @@ MainWindow::MainWindow(QWidget *parent)
     scene = new QGraphicsScene();
     ui->graphicsView_A->setScene(scene);
     ui->graphicsView_A->setRenderHint(QPainter::Antialiasing);
+    ui->graphicsView_A->setOptimizationFlags(QGraphicsView::DontAdjustForAntialiasing);
 
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::updatePosition);
     timer->start(speed);
+
+    ui->graphicsView_A->scale(scale, scale);
+    connect(ui->sl_scale, &QSlider::valueChanged, this, &MainWindow::setScaleX);
 
 
 }
@@ -309,6 +314,15 @@ void MainWindow::setSpeed(int value)
     timer->stop();
     speed = value;
     timer->start(speed);
+}
+
+void MainWindow::setScaleX(int value)
+{
+    //scale
+    scale = 1 + float(value * 0.01);
+    ui->graphicsView_A->resetTransform();
+    ui->graphicsView_A->scale(scale, scale);
+    ui->l_scale->setText(QString("x %0").arg(scale));
 }
 
 void MainWindow::setPointC(int value)

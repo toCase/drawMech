@@ -42,6 +42,7 @@ public:
     QString clr_point = "#e0218a";
 
     int speed;
+    float scale = 1;
 
 
 private:
@@ -71,6 +72,8 @@ private:
     void setShowHelpers(bool value);
 
     void setSpeed(int value);
+    void setScaleX(int value);
+
     void setPointC(int value);
 
     void run();
