@@ -63,7 +63,7 @@ jobs:
       - name: Build
         run: |
           cd ${{ runner.temp }}\build
-          qmake -r ${{ env.SOURCE_DIR }}\drawMech\drawMech\DrawProject.pro
+          qmake -r ${{ env.SOURCE_DIR }}\DrawProject.pro
           ${{ runner.temp }}\jom\jom -j2
           cd release
           windeployqt --qmldir ${{ env.SOURCE_DIR }} DrawProject.exe --pdb --release --compiler-runtime
