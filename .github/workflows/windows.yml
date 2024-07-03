@@ -50,18 +50,18 @@ jobs:
           mkdir deploy
           echo "Moving files from release"
           Get-ChildItem -Path "release" -File | Copy-Item -Destination "deploy" -Force -ErrorAction SilentlyContinue
-          echo "Moving files from tests\base_test\release"
-          Get-ChildItem -Path "tests\base_test\release" -File | Copy-Item -Destination "deploy" -Force -ErrorAction SilentlyContinue
-          echo "Moving files from tests\ui_test\release"
-          Get-ChildItem -Path "tests\ui_test\release" -File | Copy-Item -Destination "deploy" -Force -ErrorAction SilentlyContinue
-          echo "Copying samples directory"
-          xcopy /E /I "samples" "deploy\samples\"
+          # echo "Moving files from tests\base_test\release"
+          # Get-ChildItem -Path "tests\base_test\release" -File | Copy-Item -Destination "deploy" -Force -ErrorAction SilentlyContinue
+          # echo "Moving files from tests\ui_test\release"
+          # Get-ChildItem -Path "tests\ui_test\release" -File | Copy-Item -Destination "deploy" -Force -ErrorAction SilentlyContinue
+          # echo "Copying samples directory"
+          # xcopy /E /I "samples" "deploy\samples\"
 
       - name: Deploy QT application
         run: |
           windeployqt --release deploy/app.exe
-          windeployqt --release deploy/base_test.exe
-          windeployqt --release deploy/ui_test.exe
+          # windeployqt --release deploy/base_test.exe
+          # windeployqt --release deploy/ui_test.exe
 
       # - name: Run tests
       #   run: |
