@@ -18,17 +18,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Install MSVC with vcpkg
-      run: |
-        git clone https://github.com/Microsoft/vcpkg.git
-        cd vcpkg
-        bootstrap-vcpkg.bat
-        .\vcpkg install --triplet x64-windows qt6
-        .\vcpkg integrate install
-
-    - name: Set up Qt
+    - name: Install Qt via Chocolatey
       run: |
         choco install qt --version=6.7.0 -y
+
+    - name: Set up Qt environment
+      run: |
+        C:\tools\Qt\6.7.0\msvc2019_64\bin\qtenv2.bat
 
     - name: Configure and build project
       run: |
