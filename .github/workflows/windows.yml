@@ -25,10 +25,15 @@ jobs:
             arch: win64_msvc2019_64
 
       - name: Configure QT project
-        run: qmake app/app.pro
+        run: |
+          qmake app/app.pro
+          echo "qmake completed"
 
       - name: Build QT project
-        run: nmake
+        run: |
+          nmake > build_log.txt
+          echo "Build log:"
+          type build_log.txt
 
       - name: Check build output directory
         run: |
