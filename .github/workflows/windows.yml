@@ -1,77 +1,107 @@
-name: Windows Build and Release
+name: Github Actions with QT
 
-on:
-  push:
-    branches:
-      - main
-    tags:
-      - 'v*'  # Trigger on tags like v1.0.0, v1.2.3
-  pull_request:
-    branches:
-      - main
-    
-env:
-  SOURCE_DIR:   ${{ github.workspace }}
-  QT_VERSION:   6.7.0
-  ARTIFACT:     DrawProject-build.zip
+on: push
 
 jobs:
-  build:
+#   build-and-package-linux:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+
+#       - name: Install Qt
+#         uses: jurplel/install-qt-action@v3
+#         with:
+#           version: '6.5'
+#           cache: 'true'
+
+#       - name: Install linuxdeployqt
+#         run: |
+#             wget -c "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage" -O linuxdeployqt
+#             chmod +x linuxdeployqt
+
+#       - name : Install X11
+#         run: |
+#           sudo apt-get install libxcb-xinerama0
+#           sudo apt-get install libxkbcommon-x11-0 libxcb-*
+
+#       - name: Configure QT project
+#         run: qmake
+
+#       - name: Build QT project
+#         run: make
+
+#       - name: Deploy QT application
+#         run: |
+#           ./linuxdeployqt app/app --appimage-extract
+#           ./linuxdeployqt tests/base_test/base_test --appimage-extract
+#           ./linuxdeployqt tests/ui_test/ui_test --appimage-extract
+          
+#       - name: Run Tests
+#         run: |
+#           tests/base_test/base_test
+# #          tests/ui_test/ui_test
+
+#       - name: Create zip archive
+#         run: zip -r application-linux.zip .
+  
+#       - name: Upload zip artifact
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: application-linux-zip
+#           path: application-linux.zip
+
+  
+  build-and-package-windows:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: windows
-        target: desktop
-        arch: win64_msvc2019_64
-        dir: ${{ runner.temp }}
-        modules: qtcharts qt3d
-        setup-python: false
-    
-    - name: Download JOM
-      uses: suisei-cn/actions-download-file@v1
-      with:
-        url:    http://download.qt.io/official_releases/jom/jom.zip
-        target: ${{ runner.temp }}\
+      - name: Install MSVC
+        uses: TheMrMilchmann/setup-msvc-dev@v3
+        with:
+          arch: x64
 
-    - name: Unzip JOM
-      working-directory: ${{ runner.temp }}
-      run:  |
-          7z x jom.zip -ojom
-    
-    - name: Set up Visual Studio shell
-      uses: egor-tensin/vs-shell@v2
-      with:
-        arch: x64
-    
-    - name: Create build directory
-      run:  mkdir ${{ runner.temp }}\build
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.5'
+          cache: 'true'
 
-    - name: Configure and build project
-      working-directory: ${{ runner.temp }}\build
-      run: |
-        # cd drawMech
-        qmake -r DrawProject.pro
-        ${{ runner.temp }}\jom\jom -j2
-        
-        # cd release
-        # windeployqt --qmldir ${{ env.SOURCE_DIR }} DrawProject.exe 
-        # copy C:\Windows\System32\concrt140.dll .
-        # copy C:\Windows\System32\vccorlib140.dll .
-        # copy C:\Windows\System32\msvcp140.dll .
-        # copy C:\Windows\System32\vcruntime140.dll .
+      - name: Configure QT project
+        run: qmake
 
-    - name: Zip build
-      run: 7z a ${{ runner.temp }}\${{ env.ARTIFACT }} ${{ runner.temp }}\build\* -r
+      - name: Build QT project
+        run: nmake
 
-    - name: Save build artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ env.ARTIFACT }}
-        path: ${{ runner.temp }}\${{ env.ARTIFACT }}
+      - name: Move files to deploy folder
+        run: | # Copy with ignore duplicated files
+          mkdir deploy
+          Get-ChildItem -Path "app\release" -File | Copy-Item -Destination "deploy" -Force -ErrorAction SilentlyContinue
+          Get-ChildItem -Path "tests\base_test\release" -File | Copy-Item -Destination "deploy" -Force -ErrorAction SilentlyContinue
+          Get-ChildItem -Path "tests\ui_test\release" -File | Copy-Item -Destination "deploy" -Force -ErrorAction SilentlyContinue
+          xcopy /E /I "samples" "deploy\samples\"
+      
+      - name: Deploy QT application
+        run: |
+          windeployqt --release deploy/app.exe
+          windeployqt --release deploy/base_test.exe
+          windeployqt --release deploy/ui_test.exe
+
+      # - name: Run tests
+      #   run: |
+      #     cd deploy
+      #     ./base_test.exe
+      #     ./ui_test.exe
+      
+      - name: Create zip archive
+        run: 7z a application-windows.zip ./deploy/*
+
+      - name: Upload zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: application-windows-zip
+          path: application-windows.zip
