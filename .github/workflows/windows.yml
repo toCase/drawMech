@@ -9,7 +9,12 @@ on:
   pull_request:
     branches:
       - main
-
+    
+env:
+  SOURCE_DIR:   ${{ github.workspace }}
+  QT_VERSION:   6.7.0
+  ARTIFACT:     DrawProject-build.zip
+  
 jobs:
   build:
     runs-on: windows-latest
@@ -44,33 +49,17 @@ jobs:
     - name: Deploy using windeployqt
       run: |
         cd drawMech
-        windeployqt --no-translations .
+        windeployqt --qmldir DrawProject.exe --pdb --release --compiler-runtime
+        copy C:\Windows\System32\concrt140.dll .
+        copy C:\Windows\System32\vccorlib140.dll .
+        copy C:\Windows\System32\msvcp140.dll .
+        copy C:\Windows\System32\vcruntime140.dll .
 
-    - name: Archive artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: DrawProject-Windows
-        path: drawMech
+    - name: Zip build
+      run: 7z a ${{ runner.temp }}\${{ env.ARTIFACT }} ${{ runner.temp }}\build\* -r
 
-    - name: Create release
-      id: create_release
-      if: startsWith(github.ref, 'refs/tags/v')
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Save build artifact
+      uses: actions/upload-artifact@v3
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-
-    - name: Upload release artifact
-      if: startsWith(github.ref, 'refs/tags/v')
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: drawMech.zip  # Adjust based on your artifact name
-        asset_name: DrawProject-Windows.zip
-        asset_content_type: application/zip
+        name: ${{ env.ARTIFACT }}
+        path: ${{ runner.temp }}\${{ env.ARTIFACT }}
