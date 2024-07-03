@@ -27,9 +27,8 @@ jobs:
         .\vcpkg integrate install
 
     - name: Set up Qt
-      uses: jurplel/setup-qt@v3
-      with:
-        qt-version: '6.7.0'
+      run: |
+        choco install qt --version=6.7.0 -y
 
     - name: Configure and build project
       run: |
