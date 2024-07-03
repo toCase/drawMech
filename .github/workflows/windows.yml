@@ -56,16 +56,16 @@ jobs:
     - name: Configure and build project
       working-directory: ${{ runner.temp }}\build
       run: |
-        cd drawMech
-        qmake DrawProject.pro
+        # cd drawMech
+        qmake -r ${{ env.SOURCE_DIR }}\DrawProject.pro
         ${{ runner.temp }}\jom\jom -j2
         
         cd release
-        # windeployqt --qmldir ${{ env.SOURCE_DIR }} DrawProject.exe 
-        # copy C:\Windows\System32\concrt140.dll .
-        # copy C:\Windows\System32\vccorlib140.dll .
-        # copy C:\Windows\System32\msvcp140.dll .
-        # copy C:\Windows\System32\vcruntime140.dll .
+        windeployqt --qmldir ${{ env.SOURCE_DIR }} DrawProject.exe 
+        copy C:\Windows\System32\concrt140.dll .
+        copy C:\Windows\System32\vccorlib140.dll .
+        copy C:\Windows\System32\msvcp140.dll .
+        copy C:\Windows\System32\vcruntime140.dll .
 
     - name: Zip build
       run: 7z a ${{ runner.temp }}\${{ env.ARTIFACT }} ${{ runner.temp }}\build\* -r
