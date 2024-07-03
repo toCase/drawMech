@@ -14,7 +14,7 @@ env:
   SOURCE_DIR:   ${{ github.workspace }}
   QT_VERSION:   6.7.0
   ARTIFACT:     DrawProject-build.zip
-  
+
 jobs:
   build:
     runs-on: windows-latest
@@ -49,7 +49,7 @@ jobs:
     - name: Deploy using windeployqt
       run: |
         cd drawMech
-        windeployqt --qmldir DrawProject.exe --pdb --release --compiler-runtime
+        windeployqt --qmldir DrawProject.exe 
         copy C:\Windows\System32\concrt140.dll .
         copy C:\Windows\System32\vccorlib140.dll .
         copy C:\Windows\System32\msvcp140.dll .
