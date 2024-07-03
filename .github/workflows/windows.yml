@@ -28,9 +28,12 @@ jobs:
         dir: ${{ runner.temp }}
         modules: qtcharts qt3d
         setup-python: false
-    - name: Set up Qt environment
-      run: |
-        C:\tools\Qt\6.7.0\msvc2019_64\bin\qtenv2.bat
+    
+    - name: Set up Visual Studio shell
+      uses: egor-tensin/vs-shell@v2
+      with:
+        arch: x64
+    
 
     - name: Configure and build project
       run: |
