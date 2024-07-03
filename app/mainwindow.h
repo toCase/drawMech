@@ -42,7 +42,7 @@ public:
     QString clr_point = "#e0218a";
 
     int speed;
-    float scale = 1;
+    float scale = 1.5;
 
 
 private:
