@@ -77,7 +77,7 @@ jobs:
             setup-python: false
 
       - name: Configure QT project
-        run: qmake DrawMech.pro
+        run: qmake app/app.pro
 
       - name: Build QT project
         run: nmake
