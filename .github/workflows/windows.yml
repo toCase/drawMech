@@ -37,14 +37,19 @@ jobs:
 
       - name: Check build output directory
         run: |
-          echo "Listing app\release directory"
-          dir app\release
+          echo "Checking if release directory exists"
+          if (Test-Path -Path "release") {
+            echo "Listing release directory"
+            Get-ChildItem -Path "release"
+          } else {
+            echo "Release directory does not exist"
+          }
 
       - name: Move files to deploy folder
         run: |
           mkdir deploy
-          echo "Moving files from app\release"
-          Get-ChildItem -Path "app\release" -File | Copy-Item -Destination "deploy" -Force -ErrorAction SilentlyContinue
+          echo "Moving files from release"
+          Get-ChildItem -Path "release" -File | Copy-Item -Destination "deploy" -Force -ErrorAction SilentlyContinue
           echo "Moving files from tests\base_test\release"
           Get-ChildItem -Path "tests\base_test\release" -File | Copy-Item -Destination "deploy" -Force -ErrorAction SilentlyContinue
           echo "Moving files from tests\ui_test\release"

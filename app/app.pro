@@ -18,6 +18,10 @@ HEADERS += \
 FORMS += \
     mainwindow.ui
 
+
+# Ensure the output files go to the release directory
+DESTDIR = release
+
 # Default rules for deployment.
 # qnx: target.path = /tmp/$${TARGET}/bin
 # else: unix:!android: target.path = /opt/$${TARGET}/bin
