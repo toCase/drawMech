@@ -1,82 +1,72 @@
-name: Windows Release
+name: Windows Build and Release
 
 on:
   push:
     branches:
-      - 'main'
+      - main
     tags:
-      - 'v*'
+      - 'v*'  # Trigger on tags like v1.0.0, v1.2.3
   pull_request:
     branches:
-    - 'main'
-
-defaults:
-  run:
-    shell: cmd
-
-env:
-  SOURCE_DIR:   ${{ github.workspace }}
-  QT_VERSION:   6.7.0
-  ARTIFACT:     DrawProject-build.zip
+      - main
 
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: windows-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Get all tags for correct version determination
-        run: git fetch --all --tags -f
+    - name: Install MSVC with vcpkg
+      run: |
+        git clone https://github.com/Microsoft/vcpkg.git
+        cd vcpkg
+        bootstrap-vcpkg.bat
+        .\vcpkg install --triplet x64-windows qt6
+        .\vcpkg integrate install
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v2
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: windows
-          target: desktop
-          arch: win64_msvc2019_64
-          dir: ${{ runner.temp }}
-          modules: qtcharts qt3d
-          setup-python: false
+    - name: Set up Qt
+      uses: jurplel/setup-qt@v3
+      with:
+        qt-version: '6.7.0'
 
-      - name: Download JOM
-        uses: suisei-cn/actions-download-file@v1
-        with:
-          url: http://download.qt.io/official_releases/jom/jom.zip
-          target: ${{ runner.temp }}\jom.zip
+    - name: Configure and build project
+      run: |
+        cd drawMech
+        qmake DrawProject.pro
+        nmake
 
-      - name: Unzip JOM
-        run: 7z x ${{ runner.temp }}\jom.zip -ojom
+    - name: Deploy using windeployqt
+      run: |
+        cd drawMech
+        windeployqt --no-translations .
 
-      - name: Create build directory
-        run: mkdir ${{ runner.temp }}\build
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: DrawProject-Windows
+        path: drawMech
 
-      - name: Set up Visual Studio shell
-        uses: egor-tensin/vs-shell@v2
-        with:
-          arch: x64
+    - name: Create release
+      id: create_release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
 
-      - name: Build
-        run: |
-          cd ${{ runner.temp }}\build
-          qmake -r ${{ env.SOURCE_DIR }}\drawMech\DrawProject.pro
-          ${{ runner.temp }}\jom\jom -j2
-          cd release
-          windeployqt --qmldir ${{ env.SOURCE_DIR }} DrawProject.exe --pdb --release --compiler-runtime
-          copy C:\Windows\System32\concrt140.dll .
-          copy C:\Windows\System32\vccorlib140.dll .
-          copy C:\Windows\System32\msvcp140.dll .
-          copy C:\Windows\System32\vcruntime140.dll .
-
-      - name: Zip build
-        run: 7z a ${{ runner.temp }}\${{ env.ARTIFACT }} ${{ runner.temp }}\build\* -r
-
-      - name: Save build artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.ARTIFACT }}
-          path: ${{ runner.temp }}\${{ env.ARTIFACT }}
+    - name: Upload release artifact
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: drawMech.zip  # Adjust based on your artifact name
+        asset_name: DrawProject-Windows.zip
+        asset_content_type: application/zip
