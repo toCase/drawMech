@@ -1,9 +1,13 @@
 name: Github Actions with QT
 
-on: push
+on:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - 'v*'
 
-jobs:
-  
+jobs:  
   build-and-package-windows:
     runs-on: windows-latest
 
@@ -60,8 +64,6 @@ jobs:
       - name: Deploy QT application
         run: |
           windeployqt --release deploy/app.exe
-          # windeployqt --release deploy/base_test.exe
-          # windeployqt --release deploy/ui_test.exe
 
       # - name: Run tests
       #   run: |
