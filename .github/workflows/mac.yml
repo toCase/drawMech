@@ -1,11 +1,6 @@
 name: Github Actions with Qt on macOS
 
-on:
-    push:
-      branches:
-        - 'main'
-      tags:
-        - 'v*'
+on: push
 
 jobs:
   
@@ -20,6 +15,11 @@ jobs:
         run: |
           brew update
           brew install qt@6
+
+      - name: Set up Qt environment
+        run: |
+          echo 'export PATH=/usr/local/opt/qt@6/bin:$PATH' >> $GITHUB_ENV
+          source $GITHUB_ENV
 
       - name: Configure Qt project
         run: |

@@ -8,6 +8,65 @@ on:
       - 'v*'
 
 jobs:  
+
+  build-and-package-linux:
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
+
+        - name: Install dependencies
+          run: |
+            sudo apt-get update
+            sudo apt-get install -y qt6-base-dev qt6-tools-dev qt6-tools-dev-tools
+
+        - name: Set up Qt environment
+          run: |
+            echo 'export PATH=/usr/lib/qt6/bin:$PATH' >> $GITHUB_ENV
+            source $GITHUB_ENV
+
+        - name: Configure Qt project
+          run: |
+            /usr/lib/qt6/bin/qmake app/app.pro
+            echo "qmake completed"
+
+        - name: Build Qt project
+          run: |
+            make > build_log.txt
+            echo "Build log:"
+            cat build_log.txt
+
+        - name: Check build output directory
+          run: |
+            echo "Checking if release directory exists"
+            if [ -d "release" ]; then
+              echo "Listing release directory"
+              ls -la release
+            else
+              echo "Release directory does not exist"
+            fi
+
+        - name: Move files to deploy folder
+          run: |
+            mkdir -p deploy
+            echo "Moving files from release"
+            cp -r release/* deploy/
+
+        - name: Deploy Qt application
+          run: |
+            echo "Deploying application"
+            # Add any additional deployment steps if needed
+
+        - name: Create tar.gz archive
+          run: tar -czvf application-linux.tar.gz -C deploy .
+
+        - name: Upload tar.gz artifact
+          uses: actions/upload-artifact@v4
+          with:
+            name: application-linux-tar
+            path: application-linux.tar.gz
+
   build-and-package-windows:
     runs-on: windows-latest
 
