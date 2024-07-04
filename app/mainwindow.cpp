@@ -7,65 +7,13 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(ui->checkBox_setting, &QCheckBox::stateChanged, ui->frame, &QFrame::setVisible);
-    ui->frame->hide();
-
-     ui->checkBox_setting->hide();
-    // ui->sl_scale->hide();
-
     angle = 5;
-
     sizeA = 90;
-    ui->horizontalSlider_A->setValue(sizeA);
-    ui->spinBox_a->setValue(sizeA);
-    connect(ui->horizontalSlider_A, &QSlider::valueChanged, ui->spinBox_a, &QSpinBox::setValue);
-    connect(ui->horizontalSlider_A, &QSlider::valueChanged, this, &MainWindow::setSizeA);
-
-
-
     sizeB = 70;
-    ui->horizontalSlider->setValue(sizeB);
-    ui->horizontalSlider->setMaximum(sizeA);
-    ui->spinBox_b->setValue(sizeB);
-    connect(ui->horizontalSlider, &QSlider::valueChanged, ui->spinBox_b, &QSpinBox::setValue);
-    connect(ui->horizontalSlider, &QSlider::valueChanged, this, &MainWindow::setLenghtB);
-
     sizeC = 213;
-    ui->horizontalSlider_C->setValue(sizeC);
-    ui->spinBox_c->setValue(sizeC);
-    connect(ui->horizontalSlider_C, &QSlider::valueChanged, ui->spinBox_c, &QSpinBox::setValue);
-    connect(ui->horizontalSlider_C, &QSlider::valueChanged, this, &MainWindow::setSizeC);
-
     sizeD = 193;
-    ui->horizontalSlider_D->setValue(sizeD);
-    ui->spinBox_d->setValue(sizeD);
-    connect(ui->horizontalSlider_D, &QSlider::valueChanged, ui->spinBox_d, &QSpinBox::setValue);
-    connect(ui->horizontalSlider_D, &QSlider::valueChanged, this, &MainWindow::setSizeD);
-
     bY = -7;
-    ui->horizontalSlider_PC->setValue(bY);
-    ui->spinBox_pc->setValue(bY);
-    connect(ui->horizontalSlider_PC, &QSlider::valueChanged, ui->spinBox_pc, &QSpinBox::setValue);
-    connect(ui->horizontalSlider_PC, &QSlider::valueChanged, this, &MainWindow::setPointC);
-
-
-    showHelpers = true;
-    ui->checkBox_helpers->setChecked(showHelpers);
-    connect(ui->checkBox_helpers, &QCheckBox::stateChanged, this, &MainWindow::setShowHelpers);
-
-    showLabel = false;
-    ui->checkBox_labels->setChecked(showLabel);
-    connect(ui->checkBox_labels, &QCheckBox::stateChanged, this, &MainWindow::setShowLabels);
-
     speed = 5;
-    ui->horizontalSlider_Speed->setValue(speed);
-    ui->spinBox_s->setValue(speed);
-    connect(ui->horizontalSlider_Speed, &QSlider::valueChanged, ui->spinBox_s, &QSpinBox::setValue);
-    connect(ui->horizontalSlider_Speed, &QSlider::valueChanged, this, &MainWindow::setSpeed);
-
-
-    connect(ui->pushButton_run, &QPushButton::clicked, this, &MainWindow::run);
-    connect(ui->pushButton_stop, &QPushButton::clicked, this, &MainWindow::stop);
 
     scene = new QGraphicsScene();
     ui->graphicsView_A->setScene(scene);
@@ -80,8 +28,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->l_scale->setText("x 1.5");
     ui->graphicsView_A->scale(scale, scale);
     connect(ui->sl_scale, &QSlider::valueChanged, this, &MainWindow::setScaleX);
-
-
 }
 
 MainWindow::~MainWindow()
@@ -103,11 +49,6 @@ void MainWindow::updatePosition()
     QPointF pointB = getPointB(pointA);
 
     QPointF pointC(pointB.x(), pointB.y() - sizeD);
-
-
-
-    // drawHelpLine(QPointF(-100, sizeA), QPointF(300, sizeA));
-    // drawHelpLine(QPointF(-100, pointB.y() - sizeD), QPointF(300, pointB.y() - sizeD));
 
     //** tunel
     int sX = sizeD;
@@ -133,12 +74,9 @@ void MainWindow::updatePosition()
     }
 
 
-    if (showHelpers){
-        drawHelpCircle(sizeB);
-    }
+    drawHelpCircle(sizeB);
 
     //** base
-    // drawLine(startA, startB, "#009aa6", "a");
     QPointF pSA(-30, 60);
     QPointF pSB(30, 60);
 
@@ -156,30 +94,25 @@ void MainWindow::updatePosition()
         drawHelpLine(p1, p2);
     }
 
-
     //** hand
     drawLine(startB, pointA, "#009aa6", "b");
     drawLine(pointA, pointB, "#ff8fa0", "c");
-    // drawLine(pointB, pointC, "#009aa6", "d");
 
     //** rect
     drawRect(pointB);
 
-
-
-
-    // drawPoint(startA, 10, clr_point);
+    //** points
     drawPoint(startB, 10, clr_point);
     drawPoint(pointA, 10, clr_point);
     drawPoint(pointB, 10, clr_point);
-    // drawPoint(pointC, 10, clr_point);
-
 
     scene->update();
 }
 
 void MainWindow::drawLine(QPointF start, QPointF finish, QString clr, QString label)
 {
+    Q_UNUSED(label);
+
     QPen pen;
     pen.setBrush(QBrush(QColor(clr)));
     pen.setWidth(6);
@@ -187,14 +120,6 @@ void MainWindow::drawLine(QPointF start, QPointF finish, QString clr, QString la
     QGraphicsLineItem *line = new QGraphicsLineItem(start.x(), start.y(), finish.x(), finish.y());
     line->setPen(pen);
     scene->addItem(line);
-
-    if (showLabel){
-
-        QGraphicsTextItem *text = new QGraphicsTextItem();
-        text->setPlainText(label);
-        text->setPos(((finish.x() + start.x()) / 2) + 10, ((finish.y() + start.y()) / 2) - 10);
-        scene->addItem(text);
-    }
 }
 
 void MainWindow::drawHelpLine(QPointF start, QPointF finish)
@@ -225,15 +150,6 @@ void MainWindow::drawHelpCircle(int radius)
     scene->addItem(circle);
 }
 
-void MainWindow::drawText(QString label)
-{
-    QGraphicsTextItem *txt = new QGraphicsTextItem();
-    txt->setPlainText(label);
-    // txt->setPos()
-
-    scene->addItem(txt);
-}
-
 void MainWindow::drawRect(QPointF point)
 {
     QPen pen;
@@ -245,7 +161,6 @@ void MainWindow::drawRect(QPointF point)
     rect->setPen(pen);
     rect->setBrush(QBrush(Qt::NoBrush));
     scene->addItem(rect);
-
 }
 
 
@@ -255,8 +170,6 @@ void MainWindow::drawPoint(QPointF pointX, int radius, QString clr)
     point->setBrush(QBrush(QColor(clr)));
     scene->addItem(point);
 }
-
-
 
 QPointF MainWindow::getPointA(int angle, int radius)
 {
@@ -281,43 +194,6 @@ QPointF MainWindow::getPointB(QPointF pointA)
     return QPointF(bX, bY);
 }
 
-void MainWindow::setLenghtB(int value)
-{
-    sizeB = value;
-}
-
-void MainWindow::setSizeA(int value)
-{
-    sizeA = value;
-}
-
-void MainWindow::setSizeC(int value)
-{
-    sizeC = value;
-}
-
-void MainWindow::setSizeD(int value)
-{
-    sizeD = value;
-}
-
-void MainWindow::setShowLabels(bool value)
-{
-    showLabel = value;
-}
-
-void MainWindow::setShowHelpers(bool value)
-{
-    showHelpers = value;
-}
-
-void MainWindow::setSpeed(int value)
-{
-    timer->stop();
-    speed = value;
-    timer->start(speed);
-}
-
 void MainWindow::setScaleX(int value)
 {
     //scale
@@ -327,20 +203,6 @@ void MainWindow::setScaleX(int value)
     ui->l_scale->setText(QString("x %0").arg(scale));
 }
 
-void MainWindow::setPointC(int value)
-{
-    bY = value;
-}
-
-void MainWindow::run()
-{
-    timer->start(speed);
-}
-
-void MainWindow::stop()
-{
-    timer->stop();
-}
 
 
 

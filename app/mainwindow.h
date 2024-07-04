@@ -5,7 +5,6 @@
 #include <QGraphicsScene>
 #include <QGraphicsLineItem>
 #include <QGraphicsEllipseItem>
-#include <QGraphicsTextItem>
 #include <QGraphicsRectItem>
 #include <QTimer>
 #include "math.h"
@@ -28,7 +27,6 @@ public:
     QTimer *timer;
 
     int angle = 0;
-    // int ab = 200;
     float bY = -50;
 
     int sizeB;
@@ -36,8 +34,6 @@ public:
     int sizeC;
     int sizeD;
 
-    bool showLabel;
-    bool showHelpers;
 
     QString clr_point = "#e0218a";
 
@@ -63,21 +59,7 @@ private:
     QPointF getPointA(int angle, int radius);
     QPointF getPointB(QPointF pointA);
 
-    void setLenghtB(int value);
-    void setSizeA(int value);
-    void setSizeC(int value);
-    void setSizeD(int value);
-
-    void setShowLabels(bool value);
-    void setShowHelpers(bool value);
-
-    void setSpeed(int value);
     void setScaleX(int value);
-
-    void setPointC(int value);
-
-    void run();
-    void stop();
 
 
 };
