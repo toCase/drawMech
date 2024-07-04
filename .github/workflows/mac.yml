@@ -14,16 +14,17 @@ jobs:
       - name: Install Qt
         run: |
           brew update
-          brew install qt@6
+          brew install qt
 
       - name: Set up Qt environment
         run: |
-          echo 'export PATH=/usr/local/opt/qt@6/bin:$PATH' >> $GITHUB_ENV
+          echo 'export PATH="/usr/local/opt/qt/bin:$PATH"' >> $GITHUB_ENV
+          echo 'export QT_PLUGIN_PATH="/usr/local/opt/qt/plugins"' >> $GITHUB_ENV
           source $GITHUB_ENV
 
       - name: Configure Qt project
         run: |
-          /usr/local/opt/qt@6/bin/qmake app/app.pro
+          qmake app/app.pro
           echo "qmake completed"
 
       - name: Build Qt project
