@@ -1,11 +1,6 @@
 name: Github Actions with Qt on Linux
 
-on:
-    push:
-      branches:
-        - 'main'
-      tags:
-        - 'v*'
+on: push
 
 jobs:
   
@@ -21,9 +16,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y qt6-base-dev qt6-tools-dev qt6-tools-dev-tools
 
+      - name: Set up Qt environment
+        run: |
+          echo 'export PATH=/usr/lib/qt6/bin:$PATH' >> $GITHUB_ENV
+          source $GITHUB_ENV
+
       - name: Configure Qt project
         run: |
-          qmake app/app.pro
+          /usr/lib/qt6/bin/qmake app/app.pro
           echo "qmake completed"
 
       - name: Build Qt project
